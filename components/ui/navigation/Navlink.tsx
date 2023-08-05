@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
+import { cn } from "@/lib/utils";
 
 interface NavlinkProps {
   href: string;
@@ -13,7 +14,7 @@ function Navlink({ href, children }: NavlinkProps) {
   return (
     <Link
       href={href}
-      className={clsx(
+      className={cn(
         "uppercase text-sm hover:text-primary-dark cursor-pointer",
         `/${pathname.split("/")[1]}` === href
           ? "text-neutral-700"

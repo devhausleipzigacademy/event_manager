@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { type } from "os";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { cn } from "@/lib/utils";
 
 type Link = {
   href: string;
@@ -23,7 +23,7 @@ function Sidebar({ links = [] }: SidebarProps) {
         {links.map((link, idx) => (
           <li
             key={idx}
-            className={clsx(
+            className={cn(
               "text-xs text-center cursor-pointer",
               pathName === link.href
                 ? "text-white bg-primary-dark px-4 py-2 rounded-full shadow"

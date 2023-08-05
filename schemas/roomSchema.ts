@@ -12,5 +12,5 @@ export const RoomRequestSchema = createRoomSchema.extend({
   images: z.array(z.string()).optional(),
 });
 
-export type CreateRoomInput = z.infer<typeof createRoomSchema>;
+export type Room = z.infer<typeof createRoomSchema>;
 export type RoomRequest = z.infer<typeof RoomRequestSchema>;

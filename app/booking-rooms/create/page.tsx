@@ -1,16 +1,17 @@
 "use client";
-import Button from "@/components/shared/forms/Button";
-import Input from "@/components/shared/forms/Input";
-import TextArea from "@/components/shared/forms/TextArea";
+import Button from "@/components/ui/forms/Button";
+import Input from "@/components/ui/forms/Input";
+import TextArea from "@/components/ui/forms/TextArea";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { BsFillTrashFill } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateRoomInput, createRoomSchema } from "@/schemas/roomSchema";
+import { Room, createRoomSchema } from "@/schemas/roomSchema";
 import { createClient } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
+import { createRoom } from "@/services/room";
 import axios from "axios";
 
 type PreviewFile = File & { preview: string };
@@ -19,9 +20,11 @@ function CreateRoomPage() {
   const [images, setImages] = useState<PreviewFile[]>([]);
   // Create a single supabase client for interacting with your database
 
-  const supabase = createClient(
-    "https://bzoavekhwzlowuatxojx.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6b2F2ZWtod3psb3d1YXR4b2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTEwODEzNTgsImV4cCI6MjAwNjY1NzM1OH0.wgduhll3iTo9dszbUCO-TrjJHKHKGuf1Qxt9Eq5bSAM"
+  const [supabase] = useState(() =>
+    createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+    )
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -38,20 +41,23 @@ function CreateRoomPage() {
     handleSubmit: handleFormSubmit,
     formState,
     reset,
-  } = useForm<CreateRoomInput>({
+  } = useForm<Room>({
     resolver: zodResolver(createRoomSchema),
     mode: "onBlur",
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: (values: CreateRoomInput & { images: Array<string> }) =>
-      axios.post("/api/room", values),
+    mutationFn: (values: Room & { images: Array<string> }) =>
+      createRoom(values),
     onSuccess: () => {
       toast.success("Room created successfully");
-      //setImages([]);
-      //reset();
+      setImages([]);
+      reset();
     },
-    onError: (err) => toast.error("something went wrong, try again later"),
+    onError: (err) => {
+      console.log(err);
+      toast.error("something went wrong, try again later");
+    },
   });
 
   function onDrop(acceptedFiles: File[]) {
@@ -77,7 +83,7 @@ function CreateRoomPage() {
     setImages(images.filter((img) => img.name !== image.name));
   }
 
-  async function onSubmit(forminputs: CreateRoomInput) {
+  async function onSubmit(forminputs: Room) {
     const currentDate = new Date();
     const uploadedImages = images.map(async (image) => {
       const { data, error } = await supabase.storage
@@ -185,7 +191,7 @@ function CreateRoomPage() {
                 {isDragActive ? (
                   <p className="text-xs text-center">Drop the files here ...</p>
                 ) : (
-                  <p className="text-xs text-center">
+                  <p className="text-xs text-center text-neutral-400">
                     Drag 'n' drop some files here, or click to select files
                   </p>
                 )}
