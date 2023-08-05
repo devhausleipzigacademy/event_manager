@@ -18,7 +18,6 @@ model Room {
   address String
   city String
   description String
-  avatar String
   images String[] @default([])
 }
 
