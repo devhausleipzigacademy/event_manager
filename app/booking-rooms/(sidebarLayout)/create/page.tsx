@@ -11,14 +11,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Room, createRoomSchema } from "@/schemas/roomSchema";
 import { createClient } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
-import { createRoom } from "@/services/room";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 type PreviewFile = File & { preview: string };
 
 function CreateRoomPage() {
   const [images, setImages] = useState<PreviewFile[]>([]);
-  // Create a single supabase client for interacting with your database
+  const router = useRouter();
+  const { userId } = useAuth();
 
   const [supabase] = useState(() =>
     createClient(
@@ -48,11 +50,12 @@ function CreateRoomPage() {
 
   const { mutateAsync } = useMutation({
     mutationFn: (values: Room & { images: Array<string> }) =>
-      createRoom(values),
+      axios.post("/api/room", values),
     onSuccess: () => {
       toast.success("Room created successfully");
       setImages([]);
       reset();
+      router.push("/booking-rooms");
     },
     onError: (err) => {
       console.log(err);
@@ -88,7 +91,7 @@ function CreateRoomPage() {
     const uploadedImages = images.map(async (image) => {
       const { data, error } = await supabase.storage
         .from("rooms")
-        .upload(`public/${currentDate.getTime()}_${image.name}`, image, {
+        .upload(`${userId}/${currentDate.getTime()}_${image.name}`, image, {
           cacheControl: "3600",
           upsert: false,
         });

@@ -28,7 +28,7 @@ model Room {
   city String
   description String
   images String[] @default([])
-  user User @relation(fields: [userId], references: [externalId])
+  user User @relation(fields: [userId], references: [externalId], onDelete: Cascade)
   userId String
 }
 
