@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ngrok": "ngrok http --domain=oryx-famous-seal.ngrok-free.app 3000"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.23.2",
