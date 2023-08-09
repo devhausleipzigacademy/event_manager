@@ -8,9 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
+import { useMutation } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
+import axios from "axios";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 export const columns: ColumnDef<
   Pick<Room, "address" | "city" | "description" | "name" | "postal" | "id">
@@ -38,6 +41,17 @@ export const columns: ColumnDef<
     cell: ({ row }) => {
       const room = row.original;
 
+      const { mutateAsync: mutateDelete } = useMutation({
+        mutationFn: () => axios.delete(`/api/room/${room.id}`),
+        onSuccess: () => {
+          toast.success("Room created successfully");
+        },
+        onError: (err) => {
+          console.log(err);
+          toast.error("something went wrong, try again later");
+        },
+      });
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger id="actions" asChild>
@@ -53,7 +67,10 @@ export const columns: ColumnDef<
             <DropdownMenuItem className="px-6 w-full py-2 cursor-pointer hover:bg-primary hover:text-white">
               <Link href={room.id}>Edit</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="px-6 w-full py-2 cursor-pointer   hover:bg-primary hover:text-white">
+            <DropdownMenuItem
+              className="px-6 w-full py-2 cursor-pointer   hover:bg-primary hover:text-white"
+              onClick={async () => await mutateDelete()}
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
